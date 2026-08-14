@@ -1,0 +1,341 @@
+package modelos;
+
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        int opcion;
+
+        do {
+
+            System.out.println("\n==============================");
+            System.out.println("       SISTEMA POKEMON");
+            System.out.println("==============================");
+
+            System.out.println("1. Registrar Pokemon");
+            System.out.println("2. Ver todos");
+            System.out.println("3. Buscar por ID");
+            System.out.println("4. Buscar por nombre");
+            System.out.println("5. Actualizar");
+            System.out.println("6. Eliminar");
+            System.out.println("7. Eliminar por nombre");
+            System.out.println("8. Reporte por region");
+            System.out.println("0. Salir");
+
+            System.out.print("Opcion: ");
+
+            opcion = sc.nextInt();
+            sc.nextLine();
+
+
+            switch (opcion) {
+
+                // ==========================
+                // REGISTRAR
+                // ==========================
+
+                case 1:
+
+                    System.out.print("Nombre: ");
+                    String nombre = sc.nextLine();
+
+                    System.out.print("Tipo: ");
+                    String tipo = sc.nextLine();
+
+                    System.out.print("Region: ");
+                    String region = sc.nextLine();
+
+                    System.out.print("Poder: ");
+                    String poder = sc.nextLine();
+
+                    Pokemon p = new Pokemon(
+                            nombre,
+                            tipo,
+                            region,
+                            poder
+                    );
+
+                    p.save();
+
+                    System.out.println(
+                            "Pokemon registrado."
+                    );
+
+                    break;
+
+
+                // ==========================
+                // VER TODOS
+                // ==========================
+
+                case 2:
+
+                    List<Pokemon> lista =
+                            Pokemon.getAll();
+
+                    for (Pokemon pokemon : lista) {
+
+                        System.out.println(pokemon);
+                    }
+
+                    break;
+
+
+                // ==========================
+                // BUSCAR POR ID
+                // ==========================
+
+                case 3:
+
+                    System.out.print("ID: ");
+
+                    int id = sc.nextInt();
+
+                    Pokemon pokemon =
+                            Pokemon.find(id);
+
+                    if (pokemon != null) {
+
+                        System.out.println(pokemon);
+
+                    } else {
+
+                        System.out.println(
+                                "Pokemon no encontrado."
+                        );
+                    }
+
+                    break;
+
+
+                // ==========================
+                // BUSCAR POR NOMBRE
+                // ==========================
+
+                case 4:
+
+                    System.out.print(
+                            "Nombre: "
+                    );
+
+                    String nombreBusqueda =
+                            sc.nextLine();
+
+                    List<Pokemon> resultados =
+                            Pokemon.findByNombre(
+                                    nombreBusqueda
+                            );
+
+                    for (Pokemon p2 : resultados) {
+
+                        System.out.println(p2);
+                    }
+
+                    break;
+
+
+                // ==========================
+                // ACTUALIZAR
+                // ==========================
+
+                case 5:
+
+                    System.out.print(
+                            "ID del Pokemon: "
+                    );
+
+                    int idActualizar =
+                            sc.nextInt();
+
+                    sc.nextLine();
+
+                    Pokemon pokemonActualizar =
+                            Pokemon.find(
+                                    idActualizar
+                            );
+
+                    if (pokemonActualizar != null) {
+
+                        System.out.print(
+                                "Nuevo nombre: "
+                        );
+
+                        String nuevoNombre =
+                                sc.nextLine();
+
+                        System.out.print(
+                                "Nuevo tipo: "
+                        );
+
+                        String nuevoTipo =
+                                sc.nextLine();
+
+                        System.out.print(
+                                "Nueva region: "
+                        );
+
+                        String nuevaRegion =
+                                sc.nextLine();
+
+                        System.out.print(
+                                "Nuevo poder: "
+                        );
+
+                        String nuevoPoder =
+                                sc.nextLine();
+
+
+                        pokemonActualizar.setNombre(
+                                nuevoNombre
+                        );
+
+                        pokemonActualizar.setTipo(
+                                nuevoTipo
+                        );
+
+                        pokemonActualizar.setRegion(
+                                nuevaRegion
+                        );
+
+                        pokemonActualizar.setPoder(
+                                nuevoPoder
+                        );
+
+
+                        pokemonActualizar.update();
+
+                        System.out.println(
+                                "Pokemon actualizado."
+                        );
+
+                    } else {
+
+                        System.out.println(
+                                "Pokemon no encontrado."
+                        );
+                    }
+
+                    break;
+
+
+                // ==========================
+                // ELIMINAR
+                // ==========================
+
+                case 6:
+
+                    System.out.print(
+                            "ID: "
+                    );
+
+                    int idEliminar =
+                            sc.nextInt();
+
+                    Pokemon pokemonEliminar =
+                            Pokemon.find(
+                                    idEliminar
+                            );
+
+                    if (pokemonEliminar != null) {
+
+                        int filas =
+                                pokemonEliminar.delete();
+
+                        System.out.println(
+                                "Filas eliminadas: "
+                                        + filas
+                        );
+
+                    } else {
+
+                        System.out.println(
+                                "Pokemon no encontrado."
+                        );
+                    }
+
+                    break;
+
+
+                // ==========================
+                // ELIMINAR POR NOMBRE
+                // ==========================
+
+                case 7:
+
+                    System.out.print(
+                            "Nombre: "
+                    );
+
+                    String nombreEliminar =
+                            sc.nextLine();
+
+                    int filas =
+                            Pokemon.deleteByNombre(
+                                    nombreEliminar
+                            );
+
+                    System.out.println(
+                            "Filas eliminadas: "
+                                    + filas
+                    );
+
+                    break;
+
+
+                // ==========================
+                // REPORTE POR REGION
+                // ==========================
+
+                case 8:
+
+                    System.out.print(
+                            "Region: "
+                    );
+
+                    String regionReporte =
+                            sc.nextLine();
+
+                    List<Pokemon> reporte =
+                            Pokemon.generarReportePorRegion(
+                                    regionReporte
+                            );
+
+                    for (Pokemon p3 : reporte) {
+
+                        System.out.println(p3);
+                    }
+
+                    break;
+
+
+                // ==========================
+                // SALIR
+                // ==========================
+
+                case 0:
+
+                    System.out.println(
+                            "Hasta luego."
+                    );
+
+                    break;
+
+
+                default:
+
+                    System.out.println(
+                            "Opcion invalida."
+                    );
+            }
+
+        } while (opcion != 0);
+
+
+        sc.close();
+    }
+}

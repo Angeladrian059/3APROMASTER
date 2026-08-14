@@ -1,0 +1,437 @@
+package modelos; //CLASS POKEMON
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Pokemon {
+
+    private int id;
+    private String nombre;
+    private String tipo;
+    private String region;
+    private String poder;
+
+
+    // ==========================================
+    // CONSTRUCTOR PUBLICO
+    // ==========================================
+
+    public Pokemon(
+            String nombre,
+            String tipo,
+            String region,
+            String poder
+    ) {
+
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.region = region;
+        this.poder = poder;
+    }
+
+
+    // ==========================================
+    // CONSTRUCTOR PRIVADO
+    // ==========================================
+
+    private Pokemon(
+            int id,
+            String nombre,
+            String tipo,
+            String region,
+            String poder
+    ) {
+
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.region = region;
+        this.poder = poder;
+    }
+
+
+    // ==========================================
+    // SAVE
+    // ==========================================
+
+    public void save() {
+
+        String sql = """
+                INSERT INTO Pokemones
+                (nombre, tipo, region, poder)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(
+                                sql,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+        ) {
+
+            ps.setString(1, this.nombre);
+            ps.setString(2, this.tipo);
+            ps.setString(3, this.region);
+            ps.setString(4, this.poder);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+
+            if (rs.next()) {
+
+                this.id = rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+    }
+
+
+    // ==========================================
+    // DELETE
+    // ==========================================
+
+    public int delete() {
+
+        String sql =
+                "DELETE FROM Pokemones WHERE id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, this.id);
+
+            return ps.executeUpdate();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return 0;
+        }
+    }
+
+
+    // ==========================================
+    // DELETE BY NOMBRE
+    // ==========================================
+
+    public static int deleteByNombre(String nombre) {
+
+        String sql =
+                "DELETE FROM Pokemones WHERE nombre = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, nombre);
+
+            return ps.executeUpdate();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return 0;
+        }
+    }
+
+
+    // ==========================================
+    // UPDATE
+    // ==========================================
+
+    public void update() {
+
+        String sql = """
+                UPDATE Pokemones
+                SET nombre = ?,
+                    tipo = ?,
+                    region = ?,
+                    poder = ?
+                WHERE id = ?
+                """;
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, this.nombre);
+            ps.setString(2, this.tipo);
+            ps.setString(3, this.region);
+            ps.setString(4, this.poder);
+            ps.setInt(5, this.id);
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+    }
+
+
+    // ==========================================
+    // GET ALL
+    // ==========================================
+
+    public static List<Pokemon> getAll() {
+
+        List<Pokemon> lista =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM Pokemones";
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql);
+
+                ResultSet rs =
+                        ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                Pokemon p =
+                        new Pokemon(
+                                rs.getInt("id"),
+                                rs.getString("nombre"),
+                                rs.getString("tipo"),
+                                rs.getString("region"),
+                                rs.getString("poder")
+                        );
+
+                lista.add(p);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
+    // ==========================================
+    // FIND BY NOMBRE
+    // ==========================================
+
+    public static List<Pokemon> findByNombre(
+            String nombre
+    ) {
+
+        List<Pokemon> lista =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM Pokemones " +
+                "WHERE nombre = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, nombre);
+
+            ResultSet rs =
+                    ps.executeQuery();
+
+            while (rs.next()) {
+
+                Pokemon p =
+                        new Pokemon(
+                                rs.getInt("id"),
+                                rs.getString("nombre"),
+                                rs.getString("tipo"),
+                                rs.getString("region"),
+                                rs.getString("poder")
+                        );
+
+                lista.add(p);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
+    // ==========================================
+    // FIND POR ID
+    // ==========================================
+
+    public static Pokemon find(int id) {
+
+        String sql =
+                "SELECT * FROM Pokemones " +
+                "WHERE id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, id);
+
+            ResultSet rs =
+                    ps.executeQuery();
+
+            if (rs.next()) {
+
+                return new Pokemon(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("tipo"),
+                        rs.getString("region"),
+                        rs.getString("poder")
+                );
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    // ==========================================
+    // REPORTE POR REGION
+    // ==========================================
+
+    public static List<Pokemon>
+    generarReportePorRegion(String region) {
+
+        List<Pokemon> lista =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM Pokemones " +
+                "WHERE region = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, region);
+
+            ResultSet rs =
+                    ps.executeQuery();
+
+            while (rs.next()) {
+
+                Pokemon p =
+                        new Pokemon(
+                                rs.getInt("id"),
+                                rs.getString("nombre"),
+                                rs.getString("tipo"),
+                                rs.getString("region"),
+                                rs.getString("poder")
+                        );
+
+                lista.add(p);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
+    // ==========================================
+    // SETTERS
+    // ==========================================
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public void setPoder(String poder) {
+        this.poder = poder;
+    }
+
+
+    // ==========================================
+    // GETTERS
+    // ==========================================
+
+    public int getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public String getPoder() {
+        return poder;
+    }
+
+
+    // ==========================================
+    // TOSTRING
+    // ==========================================
+
+    @Override
+    public String toString() {
+
+        return "ID: " + id +
+                " | Nombre: " + nombre +
+                " | Tipo: " + tipo +
+                " | Region: " + region +
+                " | Poder: " + poder;
+    }
+}
