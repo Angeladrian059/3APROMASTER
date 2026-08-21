@@ -1,0 +1,290 @@
+package modelos;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Entrenador {
+    private int id;
+    private String nombre;
+    private double puntosLiga;
+    private String region;
+    private List<Pokemon> pokemones;
+
+    // Constructor privado obligatorio segun especificacion
+    private Entrenador() {
+        this.pokemones = new ArrayList<>();
+    }
+
+    public Entrenador(String nombre, double puntosLiga, String region) {
+        this();
+        this.nombre = nombre;
+        this.puntosLiga = puntosLiga;
+        this.region = region;
+    }
+
+    public Entrenador(int id, String nombre, double puntosLiga, String region) {
+        this();
+        this.id = id;
+        this.nombre = nombre;
+        this.puntosLiga = puntosLiga;
+        this.region = region;
+    }
+
+    // Getters y Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public double getPuntosLiga() { return puntosLiga; }
+    public void setPuntosLiga(double puntosLiga) { this.puntosLiga = puntosLiga; }
+
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
+
+    public List<Pokemon> getPokemones() { return pokemones; }
+    public void setPokemones(List<Pokemon> pokemones) { this.pokemones = pokemones; }
+
+    // --- METODOS DE PERSISTENCIA ---
+
+    // Inserta el entrenador y asigna el ID generado (RETURN_GENERATED_KEYS)
+    public void save() {
+        String sql = "INSERT INTO entrenador (nombre, puntosLiga, region) VALUES (?, ?, ?)";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            ps.setString(1, this.nombre);
+            ps.setDouble(2, this.puntosLiga);
+            ps.setString(3, this.region);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    this.id = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Elimina el entrenador actual usando su ID
+    public void delete() {
+        deleteById(this.id);
+    }
+
+    // Elimina un entrenador dado su ID
+    public static void deleteById(int id) {
+        String sql = "DELETE FROM entrenador WHERE id = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Busca y retorna un Entrenador por ID (null si no existe)
+    public static Entrenador find(int id) {
+        String sql = "SELECT * FROM entrenador WHERE id = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Entrenador(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getDouble("puntosLiga"),
+                        rs.getString("region")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Busca y retorna el primer Entrenador que coincida con ese nombre
+    public static Entrenador findByName(String nombre) {
+        String sql = "SELECT * FROM entrenador WHERE nombre = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, nombre);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Entrenador(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getDouble("puntosLiga"),
+                        rs.getString("region")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Actualiza nombre, puntosLiga y region del entrenador actual
+    public void update() {
+        String sql = "UPDATE entrenador SET nombre = ?, puntosLiga = ?, region = ? WHERE id = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, this.nombre);
+            ps.setDouble(2, this.puntosLiga);
+            ps.setString(3, this.region);
+            ps.setInt(4, this.id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Retorna lista con todos los registros de la tabla
+    public static List<Entrenador> getAll() {
+        List<Entrenador> lista = new ArrayList<>();
+        String sql = "SELECT * FROM entrenador";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                lista.add(new Entrenador(
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getDouble("puntosLiga"),
+                    rs.getString("region")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // Retorna una List<Entrenador> filtrando por region
+    public static List<Entrenador> getAllByRegion(String region) {
+        List<Entrenador> lista = new ArrayList<>();
+        String sql = "SELECT * FROM entrenador WHERE region = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, region);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Entrenador(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getDouble("puntosLiga"),
+                        rs.getString("region")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // Inserta un Pokémon asociado al entrenador actual (lanza excepcion si no tiene ID)
+    public void savePokemon(Pokemon pokemon) throws Exception {
+        if (this.id <= 0) {
+            throw new Exception("El entrenador no ha sido guardado en la BD (ID invalido).");
+        }
+        String sql = "INSERT INTO pokemon (nombre, tipo, id_entrenador) VALUES (?, ?, ?)";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            ps.setString(1, pokemon.getNombre());
+            ps.setString(2, pokemon.getTipo());
+            ps.setInt(3, this.id);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    pokemon.setId(rs.getInt(1));
+                }
+            }
+            this.pokemones.add(pokemon);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Recorre la lista e invoca savePokemon(Pokemon) por cada uno
+    public void savePokemones(List<Pokemon> pokemones) throws Exception {
+        if (pokemones != null) {
+            for (Pokemon p : pokemones) {
+                savePokemon(p);
+            }
+        }
+    }
+
+    // Consulta y retorna la lista de Pokémon asociados al entrenador (relacion 1 a N)
+    public List<Pokemon> getPokemonesFromBD() {
+        List<Pokemon> lista = new ArrayList<>();
+        String sql = "SELECT * FROM pokemon WHERE id_entrenador = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setInt(1, this.id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Pokemon(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("tipo")
+                    ));
+                }
+            }
+            this.pokemones = lista;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // Metodos opcionales marcados en el cotejo (Seccion 4)
+    public static double getTotalPuntosPorRegion(String region) {
+        String sql = "SELECT SUM(puntosLiga) AS total FROM entrenador WHERE region = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, region);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("total");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public static void deletePokemon(int idPokemon) {
+        String sql = "DELETE FROM pokemon WHERE id = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setInt(1, idPokemon);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}

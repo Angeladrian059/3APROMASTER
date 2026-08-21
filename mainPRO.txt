@@ -1,0 +1,86 @@
+import modelos.Entrenador;
+import modelos.Pokemon;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int op;
+
+        do {
+            System.out.println("\n--- MENU ---");
+            System.out.println("1. Registrar Entrenador | 2. Modificar | 3. Eliminar");
+            System.out.println("4. Buscar ID | 5. Buscar Nombre | 6. Listar Todos | 7. Por Region");
+            System.out.println("8. Asignar Pokemon | 9. Ver Pokemones | 10. Total Puntos | 0. Salir");
+            System.out.print("Opcion: ");
+            op = sc.nextInt();
+            sc.nextLine();
+
+            switch (op) {
+                case 1 -> {
+                    System.out.print("Nombre, Puntos, Region: ");
+                    Entrenador e = new Entrenador(sc.next(), sc.nextDouble(), sc.next());
+                    e.save();
+                    System.out.println("Guardado con ID: " + e.getId());
+                }
+                case 2 -> {
+                    System.out.print("ID a modificar: ");
+                    Entrenador e = Entrenador.find(sc.nextInt());
+                    if (e != null) {
+                        System.out.print("Nuevo Nombre, Puntos, Region: ");
+                        e.setNombre(sc.next());
+                        e.setPuntosLiga(sc.nextDouble());
+                        e.setRegion(sc.next());
+                        e.update();
+                        System.out.println("Actualizado.");
+                    }
+                }
+                case 3 -> {
+                    System.out.print("ID a eliminar: ");
+                    Entrenador.deleteById(sc.nextInt());
+                }
+                case 4 -> {
+                    System.out.print("ID: ");
+                    imprimir(Entrenador.find(sc.nextInt()));
+                }
+                case 5 -> {
+                    System.out.print("Nombre: ");
+                    imprimir(Entrenador.findByName(sc.next()));
+                }
+                case 6 -> Entrenador.getAll().forEach(Main::imprimir);
+                case 7 -> {
+                    System.out.print("Region: ");
+                    Entrenador.getAllByRegion(sc.next()).forEach(Main::imprimir);
+                }
+                case 8 -> {
+                    System.out.print("ID Entrenador: ");
+                    Entrenador e = Entrenador.find(sc.nextInt());
+                    if (e != null) {
+                        System.out.print("Nombre Pokemon, Tipo: ");
+                        try {
+                            e.savePokemon(new Pokemon(sc.next(), sc.next()));
+                            System.out.println("Pokemon asignado.");
+                        } catch (Exception ex) { System.out.println(ex.getMessage()); }
+                    }
+                }
+                case 9 -> {
+                    System.out.print("ID Entrenador: ");
+                    Entrenador e = Entrenador.find(sc.nextInt());
+                    if (e != null) {
+                        e.getPokemonesFromBD().forEach(p -> 
+                            System.out.println("ID: " + p.getId() + " | " + p.getNombre() + " (" + p.getTipo() + ")"));
+                    }
+                }
+                case 10 -> {
+                    System.out.print("Region: ");
+                    System.out.println("Total: " + Entrenador.getTotalPuntosPorRegion(sc.next()));
+                }
+            }
+        } while (op != 0);
+    }
+
+    private static void imprimir(Entrenador e) {
+        if (e != null) System.out.println(e.getId() + " | " + e.getNombre() + " | " + e.getPuntosLiga() + " pts | " + e.getRegion());
+        else System.out.println("No encontrado.");
+    }
+}
