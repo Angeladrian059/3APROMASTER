@@ -1,0 +1,350 @@
+package modelos;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        int opcion = 0;
+
+        try {
+
+            while (opcion != 9) {
+
+                System.out.println("\n===== MENU =====");
+                System.out.println("1. Crear empleado");
+                System.out.println("2. Buscar empleado por ID");
+                System.out.println("3. Buscar empleado por nombre");
+                System.out.println("4. Listar empleados");
+                System.out.println("5. Actualizar empleado");
+                System.out.println("6. Agregar proyecto");
+                System.out.println("7. Ver proyectos de empleado");
+                System.out.println("8. Eliminar empleado");
+                System.out.println("9. Salir");
+
+                System.out.print("Selecciona una opcion: ");
+                opcion = sc.nextInt();
+                sc.nextLine();
+
+                switch (opcion) {
+
+                    // =====================================
+                    // 1. CREAR EMPLEADO
+                    // =====================================
+
+                    case 1:
+
+                        System.out.print("Nombre: ");
+                        String nombre = sc.nextLine();
+
+                        System.out.print("Salario: ");
+                        Double salario = sc.nextDouble();
+                        sc.nextLine();
+
+                        System.out.print("Departamento: ");
+                        String departamento = sc.nextLine();
+
+                        Empleado empleado =
+                                Empleado.create(
+                                        nombre,
+                                        salario,
+                                        departamento
+                                );
+
+                        empleado.save();
+
+                        System.out.println(
+                                "Empleado guardado correctamente."
+                        );
+
+                        System.out.println(
+                                "ID generado: "
+                                        + empleado.getId()
+                        );
+
+                        break;
+
+
+                    // =====================================
+                    // 2. BUSCAR POR ID
+                    // =====================================
+
+                    case 2:
+
+                        System.out.print("ID del empleado: ");
+                        int id = sc.nextInt();
+
+                        Empleado encontrado =
+                                Empleado.find(id);
+
+                        if (encontrado != null) {
+
+                            System.out.println(encontrado);
+
+                        } else {
+
+                            System.out.println(
+                                    "Empleado no encontrado."
+                            );
+                        }
+
+                        break;
+
+
+                    // =====================================
+                    // 3. BUSCAR POR NOMBRE
+                    // =====================================
+
+                    case 3:
+
+                        System.out.print("Nombre: ");
+                        String nombreBuscar =
+                                sc.nextLine();
+
+                        Empleado empleadoNombre =
+                                Empleado.findbyName(
+                                        nombreBuscar
+                                );
+
+                        if (empleadoNombre != null) {
+
+                            System.out.println(
+                                    empleadoNombre
+                            );
+
+                        } else {
+
+                            System.out.println(
+                                    "Empleado no encontrado."
+                            );
+                        }
+
+                        break;
+
+
+                    // =====================================
+                    // 4. LISTAR EMPLEADOS
+                    // =====================================
+
+                    case 4:
+
+                        List<Empleado> empleados =
+                                Empleado.getAll();
+
+                        for (Empleado e : empleados) {
+
+                            System.out.println(e);
+                        }
+
+                        break;
+
+
+                    // =====================================
+                    // 5. ACTUALIZAR
+                    // =====================================
+
+                    case 5:
+
+                        System.out.print("ID del empleado: ");
+                        int idActualizar =
+                                sc.nextInt();
+                        sc.nextLine();
+
+                        Empleado emp =
+                                Empleado.find(idActualizar);
+
+                        if (emp != null) {
+
+                            System.out.print("Nuevo nombre: ");
+                            emp.setNombre(
+                                    sc.nextLine()
+                            );
+
+                            System.out.print("Nuevo salario: ");
+                            emp.setSalario(
+                                    sc.nextDouble()
+                            );
+                            sc.nextLine();
+
+                            System.out.print(
+                                    "Nuevo departamento: "
+                            );
+
+                            emp.setDepartamento(
+                                    sc.nextLine()
+                            );
+
+                            emp.update();
+
+                            System.out.println(
+                                    "Empleado actualizado."
+                            );
+
+                        } else {
+
+                            System.out.println(
+                                    "Empleado no encontrado."
+                            );
+                        }
+
+                        break;
+
+
+                    // =====================================
+                    // 6. AGREGAR PROYECTO
+                    // =====================================
+
+                    case 6:
+
+                        System.out.print(
+                                "ID del empleado: "
+                        );
+
+                        int idEmpleado =
+                                sc.nextInt();
+                        sc.nextLine();
+
+                        Empleado empProyecto =
+                                Empleado.find(idEmpleado);
+
+                        if (empProyecto != null) {
+
+                            System.out.print(
+                                    "Nombre del proyecto: "
+                            );
+
+                            String nombreProyecto =
+                                    sc.nextLine();
+
+                            System.out.print(
+                                    "Estado del proyecto: "
+                            );
+
+                            String estado =
+                                    sc.nextLine();
+
+                            Proyecto proyecto =
+                                    new Proyecto(
+                                            nombreProyecto,
+                                            estado
+                                    );
+
+                            empProyecto.saveProyecto(
+                                    proyecto
+                            );
+
+                            System.out.println(
+                                    "Proyecto guardado."
+                            );
+
+                        } else {
+
+                            System.out.println(
+                                    "Empleado no encontrado."
+                            );
+                        }
+
+                        break;
+
+
+                    // =====================================
+                    // 7. VER PROYECTOS
+                    // =====================================
+
+                    case 7:
+
+                        System.out.print(
+                                "ID del empleado: "
+                        );
+
+                        int idProyectos =
+                                sc.nextInt();
+
+                        Empleado empProyectos =
+                                Empleado.find(idProyectos);
+
+                        if (empProyectos != null) {
+
+                            List<Proyecto> proyectos =
+                                    empProyectos.getProyectos();
+
+                            for (Proyecto p : proyectos) {
+
+                                System.out.println(p);
+                            }
+
+                        } else {
+
+                            System.out.println(
+                                    "Empleado no encontrado."
+                            );
+                        }
+
+                        break;
+
+
+                    // =====================================
+                    // 8. ELIMINAR EMPLEADO
+                    // =====================================
+
+                    case 8:
+
+                        System.out.print(
+                                "ID del empleado: "
+                        );
+
+                        int idEliminar =
+                                sc.nextInt();
+
+                        Empleado.deletebyId(
+                                idEliminar
+                        );
+
+                        System.out.println(
+                                "Empleado eliminado."
+                        );
+
+                        break;
+
+
+                    // =====================================
+                    // 9. SALIR
+                    // =====================================
+
+                    case 9:
+
+                        System.out.println(
+                                "Programa terminado."
+                        );
+
+                        break;
+
+
+                    default:
+
+                        System.out.println(
+                                "Opcion no valida."
+                        );
+                }
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Ocurrio un error: "
+                            + e.getMessage()
+            );
+
+            e.printStackTrace();
+
+        } finally {
+
+            sc.close();
+        }
+    }
+}

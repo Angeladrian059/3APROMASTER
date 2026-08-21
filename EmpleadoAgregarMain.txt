@@ -1,0 +1,7 @@
+public static Empleado create(
+        String nombre,
+        Double salario,
+        String departamento) {
+
+    return new Empleado(nombre, salario, departamento);
+}

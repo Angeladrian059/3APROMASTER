@@ -1,0 +1,499 @@
+package modelos;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Empleado {
+
+    private int id;
+    private String nombre;
+    private Double salario;
+    private String departamento;
+
+    private List<Proyecto> proyectos;
+
+    // Constructor privado
+    private Empleado(String nombre, Double salario, String departamento) {
+
+        this.nombre = nombre;
+        this.salario = salario;
+        this.departamento = departamento;
+
+        this.proyectos = new ArrayList<>();
+    }
+
+    // Constructor para cuando viene de BD
+    private Empleado(int id, String nombre,
+                     Double salario, String departamento) {
+
+        this.id = id;
+        this.nombre = nombre;
+        this.salario = salario;
+        this.departamento = departamento;
+
+        this.proyectos = new ArrayList<>();
+    }
+
+    // GETTERS Y SETTERS
+
+    public int getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public Double getSalario() {
+        return salario;
+    }
+
+    public void setSalario(Double salario) {
+        this.salario = salario;
+    }
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public List<Proyecto> getProyectos() {
+        return proyectos;
+    }
+
+
+    // ==========================================
+    // SAVE
+    // ==========================================
+
+    public void save() throws Exception {
+
+        String sql = """
+                INSERT INTO empleados
+                (nombre, salario, departamento)
+                VALUES (?, ?, ?)
+                """;
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(
+                                sql,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+        ) {
+
+            ps.setString(1, nombre);
+            ps.setDouble(2, salario);
+            ps.setString(3, departamento);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+
+            if (rs.next()) {
+                this.id = rs.getInt(1);
+            }
+        }
+    }
+
+
+    // ==========================================
+    // DELETE
+    // ==========================================
+
+    public void delete() throws Exception {
+
+        String sql =
+                "DELETE FROM empleados WHERE id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, id);
+
+            ps.executeUpdate();
+        }
+    }
+
+
+    // ==========================================
+    // DELETE BY ID
+    // ==========================================
+
+    public static void deletebyId(int id) throws Exception {
+
+        String sql =
+                "DELETE FROM empleados WHERE id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, id);
+
+            ps.executeUpdate();
+        }
+    }
+
+
+    // ==========================================
+    // FIND
+    // ==========================================
+
+    public static Empleado find(int id) throws Exception {
+
+        String sql =
+                "SELECT * FROM empleados WHERE id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                return new Empleado(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getDouble("salario"),
+                        rs.getString("departamento")
+                );
+            }
+        }
+
+        return null;
+    }
+
+
+    // ==========================================
+    // FIND BY NAME
+    // ==========================================
+
+    public static Empleado findbyName(String nombre)
+            throws Exception {
+
+        String sql =
+                "SELECT TOP 1 * FROM empleados WHERE nombre = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, nombre);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                return new Empleado(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getDouble("salario"),
+                        rs.getString("departamento")
+                );
+            }
+        }
+
+        return null;
+    }
+
+
+    // ==========================================
+    // UPDATE
+    // ==========================================
+
+    public void update() throws Exception {
+
+        String sql = """
+                UPDATE empleados
+                SET nombre = ?,
+                    salario = ?,
+                    departamento = ?
+                WHERE id = ?
+                """;
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, nombre);
+            ps.setDouble(2, salario);
+            ps.setString(3, departamento);
+            ps.setInt(4, id);
+
+            ps.executeUpdate();
+        }
+    }
+
+
+    // ==========================================
+    // GET ALL
+    // ==========================================
+
+    public static List<Empleado> getAll()
+            throws Exception {
+
+        List<Empleado> empleados =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM empleados";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql);
+                ResultSet rs =
+                        ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                Empleado empleado =
+                        new Empleado(
+                                rs.getInt("id"),
+                                rs.getString("nombre"),
+                                rs.getDouble("salario"),
+                                rs.getString("departamento")
+                        );
+
+                empleados.add(empleado);
+            }
+        }
+
+        return empleados;
+    }
+
+
+    // ==========================================
+    // GET ALL BY NAME
+    // ==========================================
+
+    public static List<Empleado> getAllbyName(
+            String nombre) throws Exception {
+
+        List<Empleado> empleados =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM empleados WHERE nombre = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, nombre);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Empleado empleado =
+                        new Empleado(
+                                rs.getInt("id"),
+                                rs.getString("nombre"),
+                                rs.getDouble("salario"),
+                                rs.getString("departamento")
+                        );
+
+                empleados.add(empleado);
+            }
+        }
+
+        return empleados;
+    }
+
+
+    // ==========================================
+    // SAVE PROYECTO
+    // ==========================================
+
+    public void saveProyecto(
+            Proyecto proyecto) throws Exception {
+
+        if (this.id == 0) {
+
+            throw new Exception(
+                    "El empleado todavía no ha sido guardado."
+            );
+        }
+
+        String sql = """
+                INSERT INTO proyectos
+                (nombre, estado, empleados_id)
+                VALUES (?, ?, ?)
+                """;
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(
+                                sql,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+        ) {
+
+            ps.setString(1, proyecto.getNombre());
+            ps.setString(2, proyecto.getEstado());
+            ps.setInt(3, this.id);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+
+            if (rs.next()) {
+
+                proyecto.setId(rs.getInt(1));
+            }
+
+            proyectos.add(proyecto);
+        }
+    }
+
+
+    // ==========================================
+    // SAVE PROYECTOS
+    // ==========================================
+
+    public void saveProyectos(
+            List<Proyecto> proyectos) throws Exception {
+
+        for (Proyecto proyecto : proyectos) {
+
+            saveProyecto(proyecto);
+        }
+    }
+
+
+    // ==========================================
+    // GET PROYECTOS
+    // ==========================================
+
+    public List<Proyecto> getProyectos()
+            throws Exception {
+
+        List<Proyecto> lista =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM proyectos WHERE empleados_id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, this.id);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Proyecto proyecto =
+                        new Proyecto(
+                                rs.getInt("id"),
+                                rs.getString("nombre"),
+                                rs.getString("estado")
+                        );
+
+                lista.add(proyecto);
+            }
+        }
+
+        return lista;
+    }
+
+
+    // ==========================================
+    // TOTAL SALARIO POR DEPARTAMENTO
+    // ==========================================
+
+    public static Double getTotalSalarioPorDepartamento(
+            String departamento) throws Exception {
+
+        String sql = """
+                SELECT SUM(salario)
+                FROM empleados
+                WHERE departamento = ?
+                """;
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, departamento);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                return rs.getDouble(1);
+            }
+        }
+
+        return 0.0;
+    }
+
+
+    // ==========================================
+    // DELETE PROYECTO
+    // ==========================================
+
+    public void deleteProyecto(
+            int idProyecto) throws Exception {
+
+        String sql =
+                "DELETE FROM proyectos WHERE id = ?";
+
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, idProyecto);
+
+            ps.executeUpdate();
+        }
+    }
+
+
+    @Override
+    public String toString() {
+
+        return "Empleado{" +
+                "id=" + id +
+                ", nombre='" + nombre + '\'' +
+                ", salario=" + salario +
+                ", departamento='" + departamento + '\'' +
+                '}';
+    }
+}
