@@ -1,0 +1,167 @@
+```kotlin
+package com.example.estudioparaexamenramiro
+
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+
+data class Producto(
+    val nombre: String,
+    val precio: Double
+)
+
+@Composable
+fun CarritoScreen() {
+
+    val context = LocalContext.current
+
+    val productos = listOf(
+        Producto("Pikachu ⚡", 120.0),
+        Producto("Charmander 🔥", 150.0),
+        Producto("Squirtle 💧", 100.0),
+        Producto("Bulbasaur 🌿", 130.0)
+    )
+
+    val cantidades = remember {
+        mutableStateListOf(0, 0, 0, 0)
+    }
+
+    val articulos = cantidades.sum()
+
+    val subtotal = productos.indices.sumOf {
+        productos[it].precio * cantidades[it]
+    }
+
+    val descuento = if (subtotal >= 200) subtotal * 0.10 else 0.0
+
+    val subtotalFinal = subtotal - descuento
+
+    val envio = if (articulos == 0 || subtotalFinal >= 150) {
+        0.0
+    } else {
+        25.0
+    }
+
+    val total = subtotalFinal + envio
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+
+        Text(
+            "Centro Pokémon 🏥",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text("Catálogo de Pokémon ⚡")
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        productos.forEachIndexed { index, producto ->
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+            ) {
+
+                Column(modifier = Modifier.padding(12.dp)) {
+
+                    Text(producto.nombre)
+
+                    Text("Precio: $${producto.precio}")
+
+                    Text("Cantidad: ${cantidades[index]}")
+
+                    Row {
+
+                        Button(
+                            onClick = {
+                                if (cantidades[index] > 0) {
+                                    cantidades[index]--
+                                }
+                            }
+                        ) {
+                            Text("-")
+                        }
+
+                        Button(
+                            onClick = {
+                                if (cantidades[index] < 10) {
+                                    cantidades[index]++
+                                }
+                            }
+                        ) {
+                            Text("+")
+                        }
+                    }
+                }
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Column(modifier = Modifier.padding(16.dp)) {
+
+                Text(
+                    "Resumen de captura 🎒",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                Text("Pokémon seleccionados: $articulos")
+
+                Text("Subtotal: $${"%.2f".format(subtotal)}")
+
+                Text("Descuento: $${"%.2f".format(descuento)}")
+
+                Text("Envío: $${"%.2f".format(envio)}")
+
+                HorizontalDivider()
+
+                Text(
+                    "Total: $${"%.2f".format(total)}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                for (i in cantidades.indices) {
+                    cantidades[i] = 0
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Liberar Pokémon 🔄")
+        }
+
+        Button(
+            onClick = {
+                Toast.makeText(
+                    context,
+                    "¡Pokémon registrados en tu Pokédex! ⚡",
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            enabled = articulos > 0,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Confirmar captura 🎯")
+        }
+    }
+}
+```
